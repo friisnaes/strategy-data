@@ -1074,7 +1074,7 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
     <div class="brand-sep"></div>
     <div class="brand-text">Strategy Execution<br>Observatory</div>
   </div>
-  <div class="role-chip">Signalindsamling · DL-8.0.0</div>
+  <div class="role-chip">DL-8.0.0 · Schema 2.0.0 · v2 Arch</div>
 </header>
 
 <!-- ── HERO ── -->
@@ -2378,6 +2378,7 @@ function buildSubmissionContract(internalPayload) {
       eksekveringsSundhed: internalPayload.eksekveringsSundhed,
       kpiInputs: internalPayload.kpiInputs,
       dataCoverage: internalPayload.dataCoverage,
+      calculationMeta: internalPayload.calculationMeta,
     },
 
     // ── Governance metadata ──
@@ -2409,6 +2410,11 @@ function buildSubmissionContract(internalPayload) {
       timestamp: submittedAt,
       touchedSummary: touched,
       nullFieldSummary: nullFields,
+      // v2.0.0: anti-gaming coverage-gulv (fra payload)
+      coverageFloor: internalPayload.calculationMeta?.coverageFloor ?? SSI_COVERAGE_FLOOR,
+      ssiComparable: internalPayload.calculationMeta?.ssiComparable ?? null,
+      coverageRatio: internalPayload.calculationMeta?.coverageRatio ?? null,
+      comparabilityNote: internalPayload.calculationMeta?.comparabilityNote ?? null,
       previewCoverageSummary: {
         ssi: covCount + '/8',
         ofi: internalPayload.calculationMeta?.signalCoverageSummary?.ofi || null,
