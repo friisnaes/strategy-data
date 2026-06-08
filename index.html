@@ -3,14 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Strategy Execution Observatory™ — Signal Capture v7.1</title>
+<title>Strategy Execution Observatory™ — Signalindsamling v8.0</title>
 <!--
 ═══════════════════════════════════════════════════════════════════
   CHANGELOG — Strategy Execution Observatory™ · Signal Capture
   Formerly: EGF DataLeverandør
 ═══════════════════════════════════════════════════════════════════
 
-  v7.1  (2026-03-13) — Version Architecture v1
+  v8.0  (2026-06-08) — SCHEMA v2.0.0 · KRITISK METODE- & KVALITETSLØFT
+  ───────────────────────────────────────────────────────────────
+  CLEAN BREAK
+  • SCHEMA_VERSION 1.0.0 → 2.0.0. Pre-v2 filer afvises bevidst.
+  • 169-linjers v1→v7 migrationskode fjernet → lean v2-loader (~33 linjer).
+  • Legacy localStorage-nøgler (egf_lev_*) ryddet.
+
+  ANTI-GAMING COVERAGE-GULV (løser gameable null-håndtering)
+  • SSI_COVERAGE_FLOOR = 6/8. Under gulvet: ssiComparable=false.
+  • Manglende KPI-data omfordeles ALDRIG til resterende komponenter —
+    en indsender kan ikke længere hæve sit SSI ved at udelade svage signaler.
+  • calculationMeta bærer: coverageFloor, ssiComparable, coverageRatio,
+    comparabilityNote. Admin må ikke score sammenligneligt under gulvet.
+
+  SCALE SEMANTICS (løser OFI-inversionsfælden ved kilden)
+  • scaleSemantics-blok dokumenterer retning på hver skala. Brugeren angiver
+    stadig "5 = kritisk" (intuitivt); kontrakten fortæller Admin at OFI inverteres.
+
+  RISIKOSCORING (løser S×P-fælden — Cox 2008)
+  • Dual-view: S×P bevaret + additiv (S+P) score, så 5×2 skelnes fra 2×5.
+  • riskExposureAdditive + riskCountHigh tilføjet til kpiInputs.
+
+  FORSVARBAR KALIBRERING
+  • methodologyRef-blok med kilder (Cox 2008 risikomatricer, Likert-median-
+    aggregering, ikke-monoton decision speed, coverage-gulv).
+
+  SERVER-SYNC-FORBEREDELSE (pilot = flad fil, sky-klar ved videre forløb)
+  • transport-blok: mode=manual-file, syncReady=true, syncEndpoint=null,
+    stabilt clientId (localStorage) til fremtidig dedup.
+
+  DANSK SPROG
+  • Fuld dansk i UI (kun SSI/OFI/EMI bevaret som akronymer).
+  • Strategimål alignet med dansk erhvervssprog (Vækst, Kundetilfredshed,
+    Fastholdelse af omkostninger, Innovation, Compliance & risiko).
+
+
   ───────────────────────────────────────────────────────────────
   VERSIONING ARCHITECTURE
   • MODULE_ID: DL
@@ -65,8 +100,8 @@
   • New schemaVersion: 7.0
 
   INFORMATION ARCHITECTURE
-  • 9-section user journey: Formål → Grunddata → Decision Signals →
-    Friction Signals → Risk Signals → Initiative Signals →
+  • 9-section user journey: Formål → Grunddata → Beslutningssignaler →
+    Friktionssignaler → Risikosignaler → Initiativsignaler →
     Health & Capability → Observatory Preview → Export & Integrity
   • Clearer purpose framing and data usage explanation
   • Estimated time: 15–30 minutes preserved
@@ -1039,7 +1074,7 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
     <div class="brand-sep"></div>
     <div class="brand-text">Strategy Execution<br>Observatory</div>
   </div>
-  <div class="role-chip">Signal Capture · DL-7.1.0</div>
+  <div class="role-chip">Signalindsamling · DL-8.0.0</div>
 </header>
 
 <!-- ── HERO ── -->
@@ -1123,27 +1158,27 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
         </div>
         <div class="manual-step">
           <div class="ms-num">02</div>
-          <div class="ms-title">Decision Signals</div>
+          <div class="ms-title">Beslutningssignaler</div>
           <div class="ms-desc">Beslutninger truffet, afventende eller eskalerede. Inkl. niveau og eventuel eskaleringsårsag.</div>
         </div>
         <div class="manual-step">
           <div class="ms-num">03</div>
-          <div class="ms-title">Friction Signals</div>
+          <div class="ms-title">Friktionssignaler</div>
           <div class="ms-desc">Samarbejdsproblemer på tværs af funktioner. Ny: friktionskategori, omfang og fremdriftsblokering.</div>
         </div>
         <div class="manual-step">
           <div class="ms-num">04</div>
-          <div class="ms-title">Risk Signals</div>
+          <div class="ms-title">Risikosignaler</div>
           <div class="ms-desc">Risici der truer eksekvering. S×P-score, tidligt signal og mitigationsplan.</div>
         </div>
         <div class="manual-step">
           <div class="ms-num">05</div>
-          <div class="ms-title">Initiative Signals</div>
+          <div class="ms-title">Initiativsignaler</div>
           <div class="ms-desc">Initiativstatus, strategilink, milepæle, WIP og momentum-vurdering.</div>
         </div>
         <div class="manual-step">
           <div class="ms-num">06</div>
-          <div class="ms-title">Health & Capability</div>
+          <div class="ms-title">Sundhed <div class="ms-title">Health & Capability</div> kapacitet</div>
           <div class="ms-desc">Kapacitet, blokeringer, team confidence, kompetenceparathed og åbne spørgsmål.</div>
         </div>
       </div>
@@ -1241,7 +1276,7 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
   <div class="sektion">
     <div class="sektion-hoved">
       <div>
-        <div class="sek-label">Trin 2 · Decision Signals</div>
+        <div class="sek-label">Trin 2 · Beslutningssignaler</div>
         <div class="sek-title">Beslutningslog</div>
       </div>
       <span class="sek-tæller" id="t-beslutning">0 poster</span>
@@ -1271,7 +1306,7 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
   <div class="sektion">
     <div class="sektion-hoved">
       <div>
-        <div class="sek-label">Trin 3 · Friction Signals</div>
+        <div class="sek-label">Trin 3 · Friktionssignaler</div>
         <div class="sek-title">Friktionslog</div>
       </div>
       <span class="sek-tæller" id="t-friktion">0 poster</span>
@@ -1298,7 +1333,7 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
   <div class="sektion">
     <div class="sektion-hoved">
       <div>
-        <div class="sek-label">Trin 4 · Risk Signals</div>
+        <div class="sek-label">Trin 4 · Risikosignaler</div>
         <div class="sek-title">Risikolog</div>
       </div>
       <span class="sek-tæller" id="t-risiko">0 poster</span>
@@ -1325,7 +1360,7 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
   <div class="sektion">
     <div class="sektion-hoved">
       <div>
-        <div class="sek-label">Trin 5 · Initiative Signals</div>
+        <div class="sek-label">Trin 5 · Initiativsignaler</div>
         <div class="sek-title">Initiativstatus &amp; Milepæle</div>
       </div>
     </div>
@@ -1508,7 +1543,7 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
   <div class="sektion">
     <div class="sektion-hoved">
       <div>
-        <div class="sek-label">Trin 7 · Observatory Preview</div>
+        <div class="sek-label">Trin 7 · Observatory-preview</div>
         <div class="sek-title">Signal Coverage &amp; Data Quality</div>
       </div>
     </div>
@@ -1591,7 +1626,7 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
 
     <div class="meta-linje" id="meta-linje">
       Submission-ID: <span id="meta-id">—</span><br>
-      Sidst gemt: <span id="meta-gemt">—</span> · Schema <span id="meta-schema">v1.0.0</span> · Module <span id="meta-module">DL-7.1.0</span><br>
+      Sidst gemt: <span id="meta-gemt">—</span> · Schema <span id="meta-schema">v2.0.0</span> · Modul <span id="meta-module">DL-8.0.0</span><br>
       Audit: <span id="meta-audit">—</span><br>
       <span style="font-size:0.6rem;color:var(--text4);">Version Architecture v1 · Contract: initiative_submission · Integrity: SHA-256</span>
     </div>
@@ -1608,7 +1643,7 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
   <div class="modal">
     <div class="modal-hoved">
       <div>
-        <div class="m-label">Decision Signals</div>
+        <div class="m-label">Beslutningssignaler</div>
         <div class="m-title" id="b-modal-titel">Ny beslutning</div>
       </div>
       <button class="modal-luk" onclick="lukModal('modal-beslutning')">×</button>
@@ -1678,7 +1713,7 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
 <div class="modal-overlay" id="modal-friktion" onclick="lukModalVedKlik(event,'modal-friktion')">
   <div class="modal">
     <div class="modal-hoved">
-      <div><div class="m-label">Friction Signals</div><div class="m-title" id="f-modal-titel">Ny friktion</div></div>
+      <div><div class="m-label">Friktionssignaler</div><div class="m-title" id="f-modal-titel">Ny friktion</div></div>
       <button class="modal-luk" onclick="lukModal('modal-friktion')">×</button>
     </div>
     <div class="privacy-hint">Beskriv friktionen systemisk — undgå navne, personlige vurderinger og helbredsdata.</div>
@@ -1744,7 +1779,7 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
 <div class="modal-overlay" id="modal-risiko" onclick="lukModalVedKlik(event,'modal-risiko')">
   <div class="modal">
     <div class="modal-hoved">
-      <div><div class="m-label">Risk Signals</div><div class="m-title" id="r-modal-titel">Ny risiko</div></div>
+      <div><div class="m-label">Risikosignaler</div><div class="m-title" id="r-modal-titel">Ny risiko</div></div>
       <button class="modal-luk" onclick="lukModal('modal-risiko')">×</button>
     </div>
     <div class="privacy-hint">Beskriv risikoen uden personhenføring. Fokusér på organisatoriske og strukturelle faktorer.</div>
@@ -1848,17 +1883,67 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
 // DataLeverandør does NOT define scoring — Admin is sole source of truth
 // ═══════════════════════════════════════════════════════════════
 
-// ── VERSION ARCHITECTURE v1 ──────────────────────────────────
+// ── VERSION ARCHITECTURE v2 ──────────────────────────────────
 const MODULE_ID = 'DL';
-const MODULE_VERSION = '7.1.0';
-const MODULE_FULL_VERSION = 'DL-7.1.0';
-const SCHEMA_VERSION = '1.0.0';
-const SCHEMA = SCHEMA_VERSION; // backward compat alias
+const MODULE_VERSION = '8.0.0';
+const MODULE_FULL_VERSION = 'DL-8.0.0';
+const SCHEMA_VERSION = '2.0.0';
+const SCHEMA = SCHEMA_VERSION; // alias
 const RECORD_TYPE = 'initiative_submission';
 const SOURCE_ENVIRONMENT = 'prod';
 
-const LS_KEY = 'seo_dl_v1arch';
-const LS_KEY_LEGACY = 'seo_lev_v70';
+// ── v2.0.0: ANTI-GAMING COVERAGE FLOOR ───────────────────────
+// Manglende KPI-data omfordeles IKKE til de resterende komponenter.
+// Under gulvet markeres submission som ikke-sammenligneligt, så en
+// indsender ikke kan hæve sit eget SSI ved at undlade svage signaler.
+const SSI_COVERAGE_FLOOR = 6; // af 8 (streng — egnet til regulerede kunder)
+
+// ── v2.0.0: SCALE SEMANTICS ──────────────────────────────────
+// Eksplicit retning på hver skala, så Admin entydigt ved hvilken vej
+// den vender. Løser OFI-inversionsfælden ved kilden: brugeren angiver
+// stadig "5 = kritisk" (intuitivt), men kontrakten dokumenterer at
+// Admin inverterer til OFI (hvor høj score = lav friktion).
+const SCALE_SEMANTICS = {
+  frictionImpact:  { range:[1,5], direction:'higher_is_worse',
+    note:'5 = kritisk friktion. Admin inverterer til OFI (høj OFI = lav friktion).' },
+  teamConfidence:  { range:[1,5], direction:'higher_is_better' },
+  competenceReady: { range:[1,5], direction:'higher_is_better' },
+  riskProbability: { range:[1,5], direction:'higher_is_worse' },
+  riskImpact:      { range:[1,5], direction:'higher_is_worse' }
+};
+
+// ── v2.0.0: METODE-REFERENCER (forsvarbar kalibrering) ───────
+// Kilder bag normalisering og scoring. Vises i Admin og kan
+// forsvares over for en metodegennemgang. Forskningsbaserede
+// defaults hvor de findes; ekspertkalibrering resten.
+const METHODOLOGY_REF = {
+  version: 'MET-2.0.0',
+  riskScoring: 'Additiv + S×P dual-view. S×P-matricer kan rangere risici ' +
+    'svagere end tilfældigt (Cox, 2008, Risk Analysis 28(2)). Derfor leveres ' +
+    'både S×P og en additiv (S+P) score, så ens produkter (5×2 vs 2×5) skelnes.',
+  likertAggregation: 'Likert 1–5 aggregeres som median (ikke gennemsnit) for ' +
+    'at undgå falsk intervalpræcision på ordinale data.',
+  decisionSpeed: 'Ikke-monoton: meget hurtige beslutninger (<2 dage) belønnes ' +
+    'ikke fuldt, da hastværk kan indikere mangelfuld beslutningsproces.',
+  coverageFloor: `SSI markeres ikke-sammenligneligt under ${SSI_COVERAGE_FLOOR}/8 ` +
+    'komponenter. Manglende data omfordeles aldrig (ingen vægt-inflation).'
+};
+
+// ── v2.0.0: STABLE CLIENT ID (server-sync-forberedelse) ──────
+// Pilot kører som flad fil. Hvis kunden committer til videre forløb,
+// kan data lægges på en server i skyen — clientId muliggør dedup.
+function getClientId() {
+  let id = null;
+  try { id = localStorage.getItem('seo_client_id'); } catch(e) {}
+  if (!id) {
+    id = 'cli_' + Date.now().toString(36) + Math.random().toString(36).substr(2,6);
+    try { localStorage.setItem('seo_client_id', id); } catch(e) {}
+  }
+  return id;
+}
+
+const LS_KEY = 'seo_dl_v2';
+const LS_KEY_LEGACY = 'seo_dl_v1arch';
 const LS_DL  = 'egf_deadline_v1';
 
 // Governance config
@@ -1867,28 +1952,29 @@ const DECISION_LEVELS = ['Team','Function','Executive','Board'];
 const FRICTION_CATEGORIES = ['afhængighed','ressource','beslutning','prioritering','governance'];
 const ESCALATION_REASONS = ['uklarhed','mandat','prioritering','uenighed','andet'];
 
-// Strategy targets (default mapping, configurable in Admin)
+// Strategimål (default — kan konfigureres i Admin pr. organisation)
 const STRATEGY_TARGETS = [
-  { id: 'market_share',          label: 'Market Share' },
-  { id: 'customer_satisfaction', label: 'Customer Satisfaction' },
-  { id: 'cost_discipline',      label: 'Cost Discipline' },
-  { id: 'innovation',           label: 'Innovation & Growth' },
-  { id: 'compliance',           label: 'Compliance & Risk' },
-  { id: 'other',                label: 'Andet / Other' }
+  { id: 'vaekst',              label: 'Vækst' },
+  { id: 'kundetilfredshed',   label: 'Kundetilfredshed' },
+  { id: 'omkostninger',       label: 'Fastholdelse af omkostninger' },
+  { id: 'innovation',         label: 'Innovation' },
+  { id: 'compliance',         label: 'Compliance & risiko' },
+  { id: 'andet',              label: 'Andet' }
 ];
 
-// KPI Display Reference (preview coloring ONLY — NOT exported)
-// Admin module is the SOLE source of truth for KPI definitions,
-// normalization rules, SSI weights, and strategy target mapping.
+// KPI Display Reference (KUN preview-farvelægning — eksporteres IKKE)
+// Admin-modulet er ENESTE kilde til KPI-definitioner, normaliserings-
+// regler, SSI-vægte og strategimål-mapping. Retning og tærskler her er
+// alene vejledende for indsenderens preview.
 const KPI_DISPLAY_REF = [
-  {id:"closure_rate",label:"Closure Rate",unit:"%",direction:"higher_better",thresholds:{green:80,orange:60,red:40}},
-  {id:"decision_speed",label:"Decision Lead Time",unit:"days",direction:"lower_better",thresholds:{green:14,orange:30,red:60}},
-  {id:"capacity_realism",label:"Capacity Realism",unit:"%",direction:"higher_better",thresholds:{green:90,orange:75,red:60}},
-  {id:"milestone_hit",label:"Milestone Hit Rate",unit:"%",direction:"higher_better",thresholds:{green:80,orange:60,red:40}},
-  {id:"friction_load",label:"Friction Load",unit:"count",direction:"lower_better",thresholds:{green:2,orange:5,red:10}},
-  {id:"risk_exposure",label:"Risk Exposure",unit:"score",direction:"lower_better",thresholds:{green:15,orange:30,red:50}},
-  {id:"team_confidence",label:"Team Confidence",unit:"1-5",direction:"higher_better",thresholds:{green:4,orange:3,red:2}},
-  {id:"competence_ready",label:"Competence Readiness",unit:"1-5",direction:"higher_better",thresholds:{green:4,orange:3,red:2}}
+  {id:"closure_rate",label:"Lukkerate",unit:"%",direction:"higher_better",thresholds:{green:80,orange:60,red:40}},
+  {id:"decision_speed",label:"Beslutnings-leadtime",unit:"dage",direction:"lower_better",thresholds:{green:14,orange:30,red:60}},
+  {id:"capacity_realism",label:"Kapacitetsrealisme",unit:"%",direction:"higher_better",thresholds:{green:90,orange:75,red:60}},
+  {id:"milestone_hit",label:"Milepælsrate",unit:"%",direction:"higher_better",thresholds:{green:80,orange:60,red:40}},
+  {id:"friction_load",label:"Friktionsbelastning",unit:"antal",direction:"lower_better",thresholds:{green:2,orange:5,red:10}},
+  {id:"risk_exposure",label:"Risikoeksponering",unit:"score",direction:"lower_better",thresholds:{green:15,orange:30,red:50}},
+  {id:"team_confidence",label:"Teamtillid",unit:"1-5",direction:"higher_better",thresholds:{green:4,orange:3,red:2}},
+  {id:"competence_ready",label:"Kompetenceparathed",unit:"1-5",direction:"higher_better",thresholds:{green:4,orange:3,red:2}}
 ];
 
 // Initiative IDs
@@ -2024,11 +2110,17 @@ function beregKPIInputs() {
   const capRealism = (planStr && realStr && +planStr > 0) ? Math.round(+realStr / +planStr * 100) : null;
   const milestone = state.meta.touched.milestoneProgress ? +v('milestone-progress') : null;
   const openFrictions = state.friktioner.filter(f => f.status !== 'Lukket').length;
-  const riskExposure = state.risici.filter(r => r.status !== 'Lukket').reduce((sum, r) => sum + ((r.sandsynlighed || 0) * (r.pavirkning || 0)), 0);
+  // v2.0.0: Dual-view risikoscore. S×P bevares for kontinuitet, men
+  // suppleres med additiv score (S+P) — jf. Cox (2008): rene S×P-matricer
+  // kan rangere risici svagere end tilfældigt og behandler 5×2 = 2×5.
+  const openRisks = state.risici.filter(r => r.status !== 'Lukket');
+  const riskExposure = openRisks.reduce((sum, r) => sum + ((r.sandsynlighed || 0) * (r.pavirkning || 0)), 0);
+  const riskExposureAdditive = openRisks.reduce((sum, r) => sum + ((r.sandsynlighed || 0) + (r.pavirkning || 0)), 0);
+  const riskCountHigh = openRisks.filter(r => (r.sandsynlighed||0)*(r.pavirkning||0) >= 16).length;
   const tc = state.meta.touched.teamConfidence ? +v('team-confidence') : null;
   const comp = state.meta.touched.competenceReadiness ? +v('competence-readiness') : null;
 
-  return { closureRate, decisionSpeedDays: decisionSpeed, capacityRealism: capRealism, milestoneProgress: milestone, openFrictions, riskExposure, teamConfidence: tc, competenceReadiness: comp };
+  return { closureRate, decisionSpeedDays: decisionSpeed, capacityRealism: capRealism, milestoneProgress: milestone, openFrictions, riskExposure, riskExposureAdditive, riskCountHigh, teamConfidence: tc, competenceReadiness: comp };
 }
 
 // ── OBSERVATORY PREVIEW (replaces simple KPI preview) ──
@@ -2221,19 +2313,8 @@ async function computeLatestHash(contract) {
 /**
  * Build migration meta block for schema transitions.
  */
-function buildMigrationMeta(fromVersion, toVersion) {
-  return {
-    migrated: true,
-    migratedFromSchemaVersion: fromVersion,
-    migratedToSchemaVersion: toVersion || SCHEMA_VERSION,
-    migrationTimestamp: new Date().toISOString(),
-    migrationRuleSetVersion: 'MIG-1.0.0',
-    migrationNotes: `Auto-migrated from ${fromVersion} to ${toVersion || SCHEMA_VERSION}`
-  };
-}
-
 /**
- * Wrap the internal samlData() output in a Version Architecture v1 submission contract.
+ * Wrap the internal samlData() output in a v2.0.0 submission contract.
  */
 function buildSubmissionContract(internalPayload) {
   const periodKey = (internalPayload.periode?.label || '').replace(/\s+/g, '_') || null;
@@ -2245,15 +2326,18 @@ function buildSubmissionContract(internalPayload) {
   const activeInits = Object.entries(internalPayload.initiativStatuser || {}).filter(([_, s]) => s === 'Active');
   const initiativeId = activeInits.length > 0 ? `init_${activeInits[0][0].replace('.', '_')}` : null;
 
-  // Build data quality warnings
+  // Build data quality warnings (v2.0.0 — dansk, coverage-gulv)
   const warnings = [];
   const kpi = internalPayload.kpiInputs || {};
   const nullFields = Object.entries(kpi).filter(([_, val]) => val === null).map(([k]) => k);
   const touched = internalPayload.calculationMeta?.touchedSummary || {};
-  if (nullFields.length > 4) warnings.push(`Low signal coverage: ${8 - nullFields.length}/8 KPIs filled`);
-  if (!touched.teamConfidence) warnings.push('Team Confidence not actively set');
-  if (!touched.competenceReadiness) warnings.push('Competence Readiness not actively set');
-  if (!touched.milestoneProgress) warnings.push('Milestone Progress not actively set');
+  const covMeta = internalPayload.calculationMeta || {};
+  if (covMeta.ssiComparable === false) {
+    warnings.push(`SSI ikke sammenligneligt: kun ${8 - nullFields.length}/8 komponenter udfyldt (gulv: ${SSI_COVERAGE_FLOOR}/8). Manglende data omfordeles ikke.`);
+  }
+  if (!touched.teamConfidence) warnings.push('Teamtillid ikke aktivt angivet');
+  if (!touched.competenceReadiness) warnings.push('Kompetenceparathed ikke aktivt angivet');
+  if (!touched.milestoneProgress) warnings.push('Milepælsfremskridt ikke aktivt angivet');
 
   // Coverage summary
   const coverage = internalPayload.dataCoverage || {};
@@ -2298,6 +2382,23 @@ function buildSubmissionContract(internalPayload) {
 
     // ── Governance metadata ──
     governanceMeta: internalPayload.governanceMeta || {},
+
+    // ── v2.0.0: Scale semantics (løser OFI-inversion ved kilden) ──
+    scaleSemantics: SCALE_SEMANTICS,
+
+    // ── v2.0.0: Metode-referencer (forsvarbar kalibrering) ──
+    methodologyRef: METHODOLOGY_REF,
+
+    // ── v2.0.0: Transport (server-sync-forberedelse) ──
+    // Pilot: manuel filudveksling. Sync-klar hvis kunden committer
+    // til videre forløb, hvor data kan lægges på en server i skyen.
+    transport: {
+      mode: 'manual-file',
+      syncReady: true,
+      syncEndpoint: null,
+      clientId: getClientId(),
+      exportedAt: submittedAt
+    },
 
     // ── Calculation/quality metadata (preview only — not scoring) ──
     calculationMeta: {
@@ -2404,15 +2505,19 @@ function indlæs() {
 }
 
 // ── SCHEMA MIGRATION (NULL-SAFE) ──
+// ── v2.0.0 LOADER (CLEAN BREAK) ──────────────────────────────
+// v2 er et rent schema-skift. Vi unwrapper v2-kontrakter (egne
+// eksporterede filer kan genindlæses). Pre-v2 filer afvises med
+// en klar besked — gamle testdata kasseres bevidst.
 function migrateIndsendelse(data) {
-  // Version Architecture v1 contract format: unwrap payload
-  if (data.recordType === RECORD_TYPE && data.payload && data.schemaVersion === SCHEMA_VERSION) {
-    // Already in current contract format — extract internal data from payload
+  const isV2Contract = data.recordType === RECORD_TYPE && data.payload
+    && (data.schemaVersion === SCHEMA_VERSION);
+
+  if (isV2Contract) {
     const internal = Object.assign({}, data.payload);
     internal.auditTrail = data.auditTrail || [];
     internal.latestHash = data.latestHash || null;
     internal.rawInputHash = data.rawInputHash || null;
-    internal.submissionHash = data._legacy?.submissionHash || null;
     internal._contractSubmissionId = data.submissionId;
     internal._contractMeta = {
       moduleVersion: data.moduleVersion,
@@ -2423,156 +2528,16 @@ function migrateIndsendelse(data) {
     return internal;
   }
 
-  // Version Architecture v1 contract with older schema — migrate payload
-  if (data.recordType === RECORD_TYPE && data.payload) {
-    const internal = Object.assign({}, data.payload);
-    internal.schemaVersion = data.payload.schemaVersion || data.schemaVersion || '7.0';
-    internal.auditTrail = data.auditTrail || [];
-    internal.latestHash = data.latestHash || null;
-    // Continue to legacy migration below
-    return migrateIndsendelse(internal);
+  // Flad v2 (localStorage reload) — accepteres direkte
+  if (data.schemaVersion === SCHEMA_VERSION && (data.indsender || data.beslutningsLog)) {
+    return data;
   }
 
-  const ver = data.schemaVersion || '1.0';
-
-  // Already current internal format (v7.0 maps to 1.0.0 in architecture)
-  if (ver === SCHEMA_VERSION) return data;
-
-  // v7.0 is the last pre-architecture schema — migrate to 1.0.0
-  if (ver === '7.0') {
-    const d = JSON.parse(JSON.stringify(data));
-    d._migratedFrom = '7.0';
-    d.schemaVersion = SCHEMA_VERSION;
-    // v7.0 data is structurally identical — just bump schema
-    return d;
-  }
-
-  const d = JSON.parse(JSON.stringify(data));
-  d._migratedFrom = ver;
-
-  // v1.0 → migration
-  if (ver === '1.0' || !ver) {
-    d.schemaVersion = SCHEMA_VERSION;
-    const h = d.eksekveringsSundhed || {};
-    if (h.teamStemning !== undefined && h.teamConfidenceScore === undefined) h.teamConfidenceScore = h.teamStemning;
-    if (h.milepælPåSporet !== undefined && h.milestoneProgress === undefined) {
-      const map = { 'ja': 100, 'delvist': 50, 'nej': 0 };
-      h.milestoneProgress = map[h.milepælPåSporet] ?? null;
-    }
-    if (h.competenceReadiness === undefined) h.competenceReadiness = null;
-    if (h.milestoneDate === undefined) h.milestoneDate = null;
-    d.eksekveringsSundhed = h;
-    if (!d.initiativStatuser) d.initiativStatuser = {};
-    if (!d.strategyLinks) d.strategyLinks = {};
-    if (!d.auditTrail) d.auditTrail = d.auditLog || [];
-    (d.friktionsLog || []).forEach(f => {
-      if (f.impactScore === undefined) {
-        const map = { 'Høj': 5, 'Mellem': 3, 'Lav': 1 };
-        f.impactScore = map[f.pavirkning] || null;
-      }
-      // v7.0 fields: null if missing
-      if (f.frictionCategory === undefined) f.frictionCategory = null;
-      if (f.scope === undefined) f.scope = null;
-      if (f.blocksProgress === undefined) f.blocksProgress = null;
-    });
-    (d.beslutningsLog || []).forEach(b => {
-      if (b.escalationReason === undefined) b.escalationReason = null;
-    });
-    (d.risikoLog || []).forEach(r => {
-      if (r.impactsExecutionNow === undefined) r.impactsExecutionNow = null;
-    });
-    delete d.config; delete d.kpiDefinitions; delete d.ssiWeights;
-  }
-
-  // v3.0 → migration
-  if (ver === '3.0') {
-    d.schemaVersion = SCHEMA_VERSION;
-    const h = d.eksekveringsSundhed || {};
-    if (h.teamMood !== undefined && h.teamConfidenceScore === undefined) h.teamConfidenceScore = h.teamMood;
-    if (h.milestoneOnTrack !== undefined && h.milestoneProgress === undefined) {
-      const map = { 'ja': 100, 'yes': 100, 'delvist': 50, 'partial': 50, 'nej': 0, 'no': 0 };
-      h.milestoneProgress = map[String(h.milestoneOnTrack).toLowerCase()] ?? null;
-    }
-    if (h.teamStemning !== undefined && h.teamConfidenceScore === undefined) h.teamConfidenceScore = h.teamStemning;
-    if (h.competenceReadiness === undefined) h.competenceReadiness = null;
-    if (h.milestoneDate === undefined) h.milestoneDate = null;
-    d.eksekveringsSundhed = h;
-    if (!d.initiativStatuser) d.initiativStatuser = {};
-    if (!d.strategyLinks) d.strategyLinks = {};
-    if (!d.auditTrail) d.auditTrail = d.auditLog || [];
-    (d.friktionsLog || []).forEach(f => {
-      if (f.impactScore === undefined) { const map = {'Høj':5,'High':5,'Mellem':3,'Medium':3,'Lav':1,'Low':1}; f.impactScore = map[f.pavirkning]||null; }
-      if (f.frictionCategory === undefined) f.frictionCategory = null;
-      if (f.scope === undefined) f.scope = null;
-      if (f.blocksProgress === undefined) f.blocksProgress = null;
-    });
-    (d.beslutningsLog || []).forEach(b => { if (b.escalationReason === undefined) b.escalationReason = null; });
-    (d.risikoLog || []).forEach(r => { if (r.impactsExecutionNow === undefined) r.impactsExecutionNow = null; });
-    delete d.config; delete d.kpiDefinitions; delete d.ssiWeights;
-  }
-
-  // v4.0 → migration
-  if (ver === '4.0') {
-    d.schemaVersion = SCHEMA_VERSION;
-    if (d.ssiWeights) {
-      if (d.ssiWeights.milestone_hit_rate !== undefined) { d.ssiWeights.milestone_hit = d.ssiWeights.milestone_hit_rate; delete d.ssiWeights.milestone_hit_rate; }
-      if (d.ssiWeights.competence_readiness !== undefined) { d.ssiWeights.competence_ready = d.ssiWeights.competence_readiness; delete d.ssiWeights.competence_readiness; }
-    }
-    if (d.kpiDefinitions) { d.kpiDefinitions.forEach(k => { if (k.id==='milestone_hit_rate') k.id='milestone_hit'; if (k.id==='competence_readiness') k.id='competence_ready'; }); }
-    const h = d.eksekveringsSundhed || {};
-    if (h.milestoneDate === undefined) h.milestoneDate = null;
-    if (!d.initiativStatuser) d.initiativStatuser = {};
-    if (!d.strategyLinks) d.strategyLinks = {};
-    if (!d.auditTrail) d.auditTrail = d.auditLog || [];
-    (d.friktionsLog || []).forEach(f => { if (!f.frictionCategory) f.frictionCategory=null; if(!f.scope)f.scope=null; if(!f.blocksProgress)f.blocksProgress=null; });
-    (d.beslutningsLog || []).forEach(b => { if(!b.escalationReason)b.escalationReason=null; });
-    (d.risikoLog || []).forEach(r => { if(r.impactsExecutionNow===undefined)r.impactsExecutionNow=null; });
-    delete d.config; delete d.kpiDefinitions; delete d.ssiWeights;
-  }
-
-  // v5.0/v5.1 → migration
-  if (ver === '5.0' || ver === '5.1') {
-    d.schemaVersion = SCHEMA_VERSION;
-    if (!d.strategyLinks) d.strategyLinks = {};
-    const h = d.eksekveringsSundhed || {};
-    if (h.milestoneDate === undefined) h.milestoneDate = null;
-    d.eksekveringsSundhed = h;
-    if (!d.auditTrail) d.auditTrail = [];
-    (d.friktionsLog || []).forEach(f => { if(!f.frictionCategory)f.frictionCategory=null; if(!f.scope)f.scope=null; if(!f.blocksProgress)f.blocksProgress=null; });
-    (d.beslutningsLog || []).forEach(b => { if(!b.escalationReason)b.escalationReason=null; });
-    (d.risikoLog || []).forEach(r => { if(r.impactsExecutionNow===undefined)r.impactsExecutionNow=null; });
-    delete d.config; delete d.kpiDefinitions; delete d.ssiWeights;
-  }
-
-  // v6.0/v6.1/v6.2 → v7.0
-  if (ver === '6.0' || ver === '6.1' || ver === '6.2') {
-    d.schemaVersion = SCHEMA_VERSION;
-    // Add v7 fields to existing logs if missing
-    (d.friktionsLog || []).forEach(f => {
-      if (f.frictionCategory === undefined) f.frictionCategory = null;
-      if (f.scope === undefined) f.scope = null;
-      if (f.blocksProgress === undefined) f.blocksProgress = null;
-    });
-    (d.beslutningsLog || []).forEach(b => {
-      if (b.escalationReason === undefined) b.escalationReason = null;
-    });
-    (d.risikoLog || []).forEach(r => {
-      if (r.impactsExecutionNow === undefined) r.impactsExecutionNow = null;
-    });
-    // v7.0 health fields
-    const h = d.eksekveringsSundhed || {};
-    if (h.momentumSignal === undefined) h.momentumSignal = null;
-    if (h.momentumComment === undefined) h.momentumComment = null;
-    if (h.competenceComment === undefined) h.competenceComment = null;
-    d.eksekveringsSundhed = h;
-  }
-
-  // Final catch-all
-  if (d.schemaVersion !== SCHEMA_VERSION) d.schemaVersion = SCHEMA_VERSION;
-  return d;
+  // Alt andet er pre-v2 → afvises bevidst (clean break)
+  const ver = data.schemaVersion || data.payload?.schemaVersion || 'ukendt';
+  throw new Error(`PRE_V2:${ver}`);
 }
 
-// ── SAML DATA (build export payload) ──
 function samlData() {
   const kpiInputs = beregKPIInputs();
   const dataCoverage = {
@@ -2586,6 +2551,8 @@ function samlData() {
     competence_ready: kpiInputs.competenceReadiness !== null ? 1 : 0,
   };
   const coverageCount = Object.values(dataCoverage).filter(v=>v===1).length;
+  // v2.0.0: Anti-gaming coverage floor — manglende data omfordeles ALDRIG.
+  const ssiComparable = coverageCount >= SSI_COVERAGE_FLOOR;
 
   const strategyLinksExport = {};
   INIT_IDS.forEach(id => { const linkVal = v('initlink-' + id.replace('.','_')); if (linkVal) strategyLinksExport[id] = linkVal; });
@@ -2649,15 +2616,22 @@ function samlData() {
       canonicalHashUsed: true,
       migratedFrom: null,
       timestamp: new Date().toISOString(),
-      coverageSummary: `${coverageCount}/8 KPI components have data`,
+      coverageSummary: `${coverageCount}/8 KPI-komponenter har data`,
       touchedSummary: { ...state.meta.touched },
       nullFields: Object.entries(kpiInputs).filter(([_,val]) => val === null).map(([k]) => k),
+      // v2.0.0: Anti-gaming coverage-gulv
+      coverageFloor: SSI_COVERAGE_FLOOR,
+      ssiComparable: ssiComparable,
+      coverageRatio: +(coverageCount/8).toFixed(2),
+      comparabilityNote: ssiComparable
+        ? `SSI sammenligneligt (${coverageCount}/8 komponenter)`
+        : `SSI IKKE sammenligneligt — kun ${coverageCount}/8 (gulv: ${SSI_COVERAGE_FLOOR}/8). Manglende data omfordeles ikke.`,
       signalCoverageSummary: {
         ssi: coverageCount + '/8',
-        ofi: null, // computed at export
-        emi: null  // computed at export
+        ofi: null, // beregnes ved eksport
+        emi: null  // beregnes ved eksport
       },
-      dataQualityWarnings: [], // populated at export
+      dataQualityWarnings: [], // udfyldes ved eksport
     },
     governanceMeta: {
       activeInitiatives: Object.values(state.initiativStatuser).filter(s=>s==='Active').length,
@@ -2900,8 +2874,13 @@ function sletBeslutning(i) { if(!confirm('Slet?'))return; state.beslutninger.spl
 // ── FRIKTIONER ──
 let fRedigerIdx = -1;
 function gemFriktion() {
-  const req = [['f-dato','fm-f-dato'],['f-status','fm-f-status'],['f-omrA','fm-f-omrA'],['f-omrB','fm-f-omrB'],['f-problem','fm-f-problem'],['f-impact-score','fm-f-impact'],['f-ansvarlig','fm-f-ansvarlig'],['f-naeste','fm-f-naeste'],['f-category','fm-f-cat']];
+  // v2.0.0 UX: kun metodisk uundværlige felter er påkrævet.
+  // Kategori og næste skridt er anbefalede (blød validering, ikke blokerende).
+  const req = [['f-dato','fm-f-dato'],['f-status','fm-f-status'],['f-omrA','fm-f-omrA'],['f-omrB','fm-f-omrB'],['f-problem','fm-f-problem'],['f-impact-score','fm-f-impact'],['f-ansvarlig','fm-f-ansvarlig']];
   if (!valider(req)) return;
+  // Blød anbefaling (blokerer ikke indsendelse)
+  if (!v('f-category')) vis('Anbefaling: angiv friktionskategori for bedre OFI-indsigt','info');
+  if (!v('f-naeste')) vis('Anbefaling: angiv næste skridt','info');
   // Validate A ≠ B
   if (v('f-omrA').trim().toLowerCase() === v('f-omrB').trim().toLowerCase()) {
     vis('Område A og B skal være forskellige — friktion er per definition tværgående','warn');
@@ -2951,8 +2930,12 @@ function sletFriktion(i) { if(!confirm('Slet?'))return; state.friktioner.splice(
 // ── RISICI ──
 let rRedigerIdx = -1;
 function gemRisiko() {
-  const req = [['r-dato','fm-r-dato'],['r-status','fm-r-status'],['r-beskr','fm-r-beskr'],['r-signal','fm-r-signal'],['r-mitig','fm-r-mitig'],['r-ansvarlig','fm-r-ansvarlig'],['r-sand','fm-r-sand'],['r-pav','fm-r-pav']];
+  // v2.0.0 UX: påkrævet = beskrivelse, S, P, status, dato, ansvarlig.
+  // Tidligt signal og mitigationsplan er stærkt anbefalede (blød validering).
+  const req = [['r-dato','fm-r-dato'],['r-status','fm-r-status'],['r-beskr','fm-r-beskr'],['r-ansvarlig','fm-r-ansvarlig'],['r-sand','fm-r-sand'],['r-pav','fm-r-pav']];
   if (!valider(req)) return;
+  if (!v('r-signal')) vis('Anbefaling: angiv et tidligt advarselssignal — styrker risikostyringen','info');
+  if (!v('r-mitig')) vis('Anbefaling: angiv en mitigationsplan','info');
   const r = {
     id: gi('r-edit-id').value||uid('RSK'), datoLogget: v('r-dato'), status: v('r-status'),
     risikoBeskrivelse: v('r-beskr'), tidligtSignal: v('r-signal'), mitigationsPlan: v('r-mitig'),
@@ -3127,13 +3110,7 @@ async function eksport() {
     contract._legacy.submissionHash = await sha256Prefixed(contractCopy);
   } catch(e) { console.warn('submissionHash failed:', e); }
 
-  // Migration meta if imported from older schema
-  if (internalPayload.calculationMeta?.migratedFrom) {
-    contract.migrationMeta = buildMigrationMeta(
-      internalPayload.calculationMeta.migratedFrom,
-      SCHEMA_VERSION
-    );
-  }
+  // v2.0.0: clean break — ingen migration meta
 
   // Encryption
   const brug_krypt = gi('krypt-aktiv').checked;
@@ -3148,7 +3125,7 @@ async function eksport() {
   }
 
   const dato = new Date().toISOString().split('T')[0];
-  const filnavn = `seo_dl_v1_${v('pseudonym').replace(/\s+/g,'_')}_${dato}.json`;
+  const filnavn = `seo_dl_v2_${v('pseudonym').replace(/\s+/g,'_')}_${dato}.json`;
   download(filnavn, indhold);
   state.sidstGemt = new Date().toISOString();
   state.auditTrail = contract.auditTrail;
@@ -3179,35 +3156,38 @@ async function importFil(event) {
     catch(e) { vis('Forkert adgangskode','fejl'); return; }
   }
 
-  // Detect format: Version Architecture v1 contract or legacy
+  // Detect format: v2 contract or flat v2
   const isContract = parsed.recordType === RECORD_TYPE && parsed.payload;
-  const isLegacy = parsed.schemaVersion || parsed.indsender || parsed.beslutningsLog;
+  const isFlatV2 = parsed.schemaVersion === SCHEMA_VERSION && (parsed.indsender || parsed.beslutningsLog);
 
-  if (!isContract && !isLegacy) {
-    vis('Ukendt filformat — forventede DataLeverandør JSON (v1.0–v7.0 eller v1 contract)','fejl'); return;
+  if (!isContract && !isFlatV2) {
+    const ver = parsed.schemaVersion || parsed.payload?.schemaVersion || 'ukendt';
+    vis(`Filen er ikke v2-format (fundet: v${ver}). v2 er et rent schema-skift — tidligere filer understøttes ikke. Opret en ny indsendelse.`,'fejl');
+    event.target.value='';
+    return;
   }
 
-  let originalVer;
+  let originalVer = parsed.schemaVersion || parsed.payload?.schemaVersion || SCHEMA_VERSION;
   if (isContract) {
-    originalVer = parsed.schemaVersion || parsed.payload?.schemaVersion || 'contract';
-    // Restore submission ID from contract
     if (parsed.submissionId) state.indsendelsesId = parsed.submissionId;
     if (parsed.isDemoData) state.isDemoData = parsed.isDemoData;
-  } else {
-    originalVer = parsed.schemaVersion || '1.0';
   }
 
-  const migrated = migrateIndsendelse(parsed);
+  let migrated;
+  try {
+    migrated = migrateIndsendelse(parsed);
+  } catch(e) {
+    if (String(e.message).startsWith('PRE_V2')) {
+      vis('Pre-v2 fil afvist (clean break). Opret en ny indsendelse i v2.','fejl');
+    } else {
+      vis('Importfejl: '+e.message,'fejl');
+    }
+    event.target.value='';
+    return;
+  }
   udfyldFra(migrated);
   opdaterMeta();
-
-  if (isContract && originalVer === SCHEMA_VERSION) {
-    vis(`Importeret fra v1 contract (${MODULE_FULL_VERSION})`,'ok');
-  } else if (originalVer !== SCHEMA_VERSION) {
-    vis(`Importeret & migreret fra v${originalVer} → v${SCHEMA_VERSION}`,'ok');
-  } else {
-    vis('Data importeret fra fil','ok');
-  }
+  vis(`Importeret (${MODULE_FULL_VERSION}, Schema ${SCHEMA_VERSION})`,'ok');
   event.target.value='';
 }
 
@@ -3216,13 +3196,6 @@ function nulstil() {
   if (!confirm('Nulstil alle data? Eksportér først!')) return;
   localStorage.removeItem(LS_KEY);
   localStorage.removeItem(LS_KEY_LEGACY);
-  localStorage.removeItem('seo_lev_v70');
-  localStorage.removeItem('egf_lev_v62');
-  localStorage.removeItem('egf_lev_v60');
-  localStorage.removeItem('egf_lev_v51');
-  localStorage.removeItem('egf_lev_v5');
-  localStorage.removeItem('egf_lev_v4');
-  localStorage.removeItem('egf_lev_v2');
   state = { indsendelsesId:makeSubmissionId(), oprettet:new Date().toISOString(), sidstGemt:null, beslutninger:[], friktioner:[], risici:[], initiativStatuser:{}, strategyLinks:{}, _statusTimestamps:{}, auditTrail:[], latestHash:null, submissionHash:null, isDemoData:false, meta:{touched:{teamConfidence:false,competenceReadiness:false,milestoneProgress:false}} };
   ['pseudonym','omraade','periode-label','periode-start','periode-slut','org-id','blokeringer','wip','stoppede-pauserede','kapacitet','spoergsmaal','planlagt-kapacitet','realistisk-kapacitet','milestone-date','tc-comment','comp-comment','momentum-signal','momentum-comment'].forEach(id=>sv(id,''));
   gi('team-confidence').value = 3; opdaterTCVis(); gi('hint-tc').style.display='';
